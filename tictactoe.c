@@ -51,7 +51,7 @@ int menuMain() {
 	return option;
 }
 
-int getIndex(Game *game, int x, int y) {
+int getPlayerIndex(Game *game, int x, int y) {
 	return game->board[x + y * game->settings->height];
 }
 
@@ -67,7 +67,7 @@ void draw(Game *game) {
 	for (int y = 0; y < game->settings->height; y++) {
 		*(current++) = '|';
 		for (int x = 0; x < game->settings->width; x++) {
-			*(current++) = game->settings->tokens[getIndex(game, x, y)];
+			*(current++) = game->settings->tokens[getPlayerIndex(game, x, y)];
 		}
 		*(current++) = '|';
 		*(current++) = '\n';
@@ -81,8 +81,27 @@ void draw(Game *game) {
 	fprintf(stdout, "%s", buffer);
 }
 
+void inputValidatedMove(Game *game, int *move) {
+	int x, y;
+	x = -1;
+	y = -1;
+	while (x < 1 || x > game->settings->width || y < 1 || y > game->settings->height) {
+		fprintf(stdout, "\nEnter move (x y): ");
+		fscanf(stdin, "%d %d", &x, &y);
+		if (getPlayerIndex(game, x, y) == 0) {
+			move[0] = x;
+			move[1] = y;
+			return;
+		}
+	}
+}
+
 void playHotseat(Game * game) {
-	draw(game);	
+	int *move = calloc(2, sizeof(int));
+	draw(game);
+	inputValidatedMove(game, move);
+	fprintf(stdout, "You entered move (%d %d)\n", move[0], move[1]);
+	free(move);
 }
 
 int main(int argc, char** argv) {
