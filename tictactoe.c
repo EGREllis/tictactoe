@@ -13,6 +13,8 @@ typedef struct Games {
 	Settings *settings;
 } Game;
 
+const int[[[]]] winVector = { {{0, 1}, {0, -1}}, {{1, 0}, {-1,0}}, {{1,1}, {-1,-1}}, {{1, -1}, {-1, 1}} };
+
 Settings *newSettings(int nplayers, int width, int height, char *tokens) {
 	Settings *settings = malloc(sizeof(Settings));
 	if (settings != NULL) {
