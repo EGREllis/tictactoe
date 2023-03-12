@@ -1,5 +1,6 @@
 package net.ellise.tictactoe.integration;
 
+import com.meterware.httpunit.*;
 import net.ellise.tictactoe.web.WebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,5 +41,15 @@ class AcceptanceTest {
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
         connection.connect();
         assertThat(connection.getResponseCode(), is(equalTo(200)));
+    }
+
+    @Test
+    void indexPageLinksToRegisterPage() throws Exception {
+        WebConversation conversation = new WebConversation();
+        WebResponse rootResponse = conversation.getResponse(CLIENT_ROOT_URL);
+        WebLink registerLink = rootResponse.getLinkWith("register");
+        WebResponse registerClicked = registerLink.click();
+
+        assertThat(registerClicked.getResponseCode(), is(equalTo(200)));
     }
 }

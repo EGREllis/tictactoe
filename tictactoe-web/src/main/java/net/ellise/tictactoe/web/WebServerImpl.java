@@ -2,6 +2,7 @@ package net.ellise.tictactoe.web;
 
 import com.sun.net.httpserver.HttpServer;
 import net.ellise.tictactoe.web.handler.IndexHandler;
+import net.ellise.tictactoe.web.handler.RegisterHandler;
 
 import java.net.InetSocketAddress;
 
@@ -27,6 +28,7 @@ public class WebServerImpl implements WebServer {
     public void start() throws Exception {
         server = HttpServer.create(new InetSocketAddress(hostname, port), 0);
         server.createContext("/", new IndexHandler());
+        server.createContext("/register", new RegisterHandler());
         server.setExecutor(null);
         server.start();
     }

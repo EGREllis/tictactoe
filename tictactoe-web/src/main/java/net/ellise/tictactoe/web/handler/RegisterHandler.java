@@ -8,10 +8,10 @@ import java.io.OutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class IndexHandler implements HttpHandler {
+public class RegisterHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String html = "<html><head><title>Index page</title></head><body><p>Index page</p><p><a href='./register'>Register</a></p></body></html>";
+        String html = "<html><head><title>Register</title></head><body><p>Register page</p></body></html>";
         byte[] response = html.getBytes(UTF_8);
         exchange.sendResponseHeaders(200, response.length);
         OutputStream outputStream = exchange.getResponseBody();
