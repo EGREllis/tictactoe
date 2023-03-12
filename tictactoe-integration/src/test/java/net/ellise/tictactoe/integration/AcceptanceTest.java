@@ -11,8 +11,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class AcceptanceTest {
@@ -48,8 +47,47 @@ class AcceptanceTest {
         WebConversation conversation = new WebConversation();
         WebResponse rootResponse = conversation.getResponse(CLIENT_ROOT_URL);
         WebLink registerLink = rootResponse.getLinkWith("register");
-        WebResponse registerClicked = registerLink.click();
+        registerLink.click();
+        WebResponse registerPage = conversation.getCurrentPage();
 
-        assertThat(registerClicked.getResponseCode(), is(equalTo(200)));
+        assertThat(registerPage.getResponseCode(), is(equalTo(200)));
+    }
+
+    @Test
+    void indexPageCanNotLoginWithoutRegistration() throws Exception {
+        WebConversation conversation = new WebConversation();
+        WebResponse indexResponse = conversation.getResponse(CLIENT_ROOT_URL);
+        WebForm loginForm = indexResponse.getFormWithID("login");
+
+        loginForm.setParameter("username", "John");
+        loginForm.setParameter("password", "Wick");
+        WebResponse canNotLogin = loginForm.submit();
+
+        assertThat(canNotLogin.getResponseCode(), is(equalTo(200)));
+        assertThat(canNotLogin.getText(), containsString("We could not find a user with that username and password."));
+    }
+
+    @Test
+    void indexPageCanLogInAfterRegistration() throws Exception {
+        WebConversation webConversation = new WebConversation();
+        WebResponse indexResponse = webConversation.getResponse(CLIENT_ROOT_URL);
+        WebLink registerLink = indexResponse.getLinkWith("register");
+        registerLink.click();
+        WebResponse registerPage = webConversation.getCurrentPage();
+        WebForm registerForm = registerPage.getFormWithID("register");
+        registerForm.setParameter("username", "John.Wick");
+        registerForm.setParameter("password", "dog");
+        registerForm.setParameter("confirm", "dog");
+        registerForm.submit();
+
+        WebResponse loginPage = webConversation.getCurrentPage();
+        WebForm loginForm = loginPage.getFormWithID("login");
+        loginForm.setParameter("username", "John.Wick");
+        loginForm.setParameter("password", "dog");
+        loginForm.submit();
+
+        WebResponse lobbyPage = webConversation.getCurrentPage();
+        assertThat(lobbyPage.getResponseCode(), is(equalTo(200)));
+        assertThat(lobbyPage.getText(), containsString("Welcome John.Wick"));
     }
 }
