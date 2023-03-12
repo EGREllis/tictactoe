@@ -79,5 +79,6 @@
     <module>tictactoe-web</module>
     <module>tictactoe-domain</module>
     <module>tictactoe-repository</module>
+    <module>tictactoe-integration</module>
   </modules>
 </project>
