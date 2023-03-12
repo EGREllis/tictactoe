@@ -6,10 +6,17 @@ import net.ellise.tictactoe.web.handler.IndexHandler;
 import java.net.InetSocketAddress;
 
 public class WebServerImpl implements WebServer {
+    private static final String DEFAULT_HOSTNAME = "localhost";
+    private static final int DEFAULT_PORT = 8080;
     private static final int DELAY_SECONDS = 1;
     private final String hostname;
     private final int port;
     private HttpServer server;
+
+    // Used by the Java Services API
+    public WebServerImpl() {
+        this(DEFAULT_HOSTNAME, DEFAULT_PORT);
+    }
 
     public WebServerImpl(String hostname, int port) {
         this.hostname = hostname;
@@ -25,12 +32,12 @@ public class WebServerImpl implements WebServer {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop() {
         server.stop(DELAY_SECONDS);
     }
 
     public static WebServer getDefault() {
-        return new WebServerImpl("localhost", 8080);
+        return new WebServerImpl(DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
 
     public static void main(String[] args) throws Exception {

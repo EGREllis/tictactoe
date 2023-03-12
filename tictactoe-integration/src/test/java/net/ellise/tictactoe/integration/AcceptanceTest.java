@@ -1,13 +1,14 @@
 package net.ellise.tictactoe.integration;
 
 import net.ellise.tictactoe.web.WebServer;
-import net.ellise.tictactoe.web.WebServerImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -19,7 +20,12 @@ class AcceptanceTest {
 
     @BeforeEach
     void setup() throws Exception {
-        webServer = WebServerImpl.getDefault();
+        ServiceLoader<WebServer> serviceLoader = ServiceLoader.load(WebServer.class);
+        Iterator<WebServer> webServerIterator = serviceLoader.iterator();
+        if (!webServerIterator.hasNext()) {
+            throw new IllegalStateException("Could not load WebServer.class from ServiceLoader!");
+        }
+        webServer = webServerIterator.next();
         webServer.start();
     }
 
