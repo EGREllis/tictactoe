@@ -5,11 +5,17 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class HandlerUtil {
+    private static final Logger log = Logger.getLogger(HandlerUtil.class.getCanonicalName());
+
     public static String loadPageFromClasspath(String path) {
         StringBuilder result = new StringBuilder();
         try (InputStream inputStream = ClassLoader.getSystemResourceAsStream(path);
@@ -27,6 +33,11 @@ public class HandlerUtil {
 
     public static void writeHtmlAndClose(HttpExchange exchange, String html, int responseCode) throws IOException {
         byte[] response = html.getBytes(UTF_8);
+        Headers headers = exchange.getResponseHeaders();
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            System.out.println("Response header: \t"+entry.getKey()+" : "+entry.getValue());
+        }
+
         exchange.sendResponseHeaders(responseCode, response.length);
         OutputStream outputStream = exchange.getResponseBody();
         outputStream.write(response);
@@ -34,8 +45,30 @@ public class HandlerUtil {
     }
 
     public static void writeCookie(HttpExchange exchange, String cookieName, String cookieValue) {
+        Headers responseHeader = exchange.getResponseHeaders();
+        responseHeader.set("Set-Cookie", cookieName+"="+cookieValue+";");
+    }
+
+    public static String getCookie(HttpExchange exchange, String cookieName) {
+        String result = "";
         Headers headers = exchange.getRequestHeaders();
-        headers.add(cookieName, cookieValue);
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+            if ("Cookie".equals(entry.getKey())) {
+                for (String value : entry.getValue()) {
+                    for (String parameter : value.split("; ")) {
+                        Pattern pattern = Pattern.compile("([^=]+)=([^=]+)");
+                        Matcher matcher = pattern.matcher(parameter);
+                        if (matcher.matches()) {
+                            if (cookieName.equals(matcher.group(1))) {
+                                result = matcher.group(2);
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public static Map<String,String> parsePostAttributes(HttpExchange exchange) {
