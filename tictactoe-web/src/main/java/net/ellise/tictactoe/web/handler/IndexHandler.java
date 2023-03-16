@@ -26,7 +26,6 @@ public class IndexHandler implements HttpHandler {
         int responseCode = 503;
         String cookieUsername = HandlerUtil.getCookie(exchange, COOKIE_USERNAME_KEY);
         String cookiePassword = HandlerUtil.getCookie(exchange, COOKIE_PASSWORD_KEY);
-        System.out.println("Cookie username: "+cookieUsername + " Cookie password: "+cookiePassword);
         if (userRepository.loadUser(cookieUsername, cookiePassword) != null) {
             String htmlTemplate = HandlerUtil.loadPageFromClasspath("html/lobby.html");
             html = String.format(htmlTemplate, cookieUsername);
