@@ -33,11 +33,6 @@ public class HandlerUtil {
 
     public static void writeHtmlAndClose(HttpExchange exchange, String html, int responseCode) throws IOException {
         byte[] response = html.getBytes(UTF_8);
-        Headers headers = exchange.getResponseHeaders();
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            System.out.println("Response header: \t"+entry.getKey()+" : "+entry.getValue());
-        }
-
         exchange.sendResponseHeaders(responseCode, response.length);
         OutputStream outputStream = exchange.getResponseBody();
         outputStream.write(response);
