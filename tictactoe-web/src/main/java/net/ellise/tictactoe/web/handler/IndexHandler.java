@@ -42,11 +42,11 @@ public class IndexHandler implements HttpHandler {
                 String username = attributes.get(USERNAME_KEY);
                 String password = attributes.get(PASSWORD_KEY);
                 if (userRepository.loadUser(username, password) == null) {
-                    LOGGER.info(String.format("Log in for %1$s successful.", username));
+                    LOGGER.info(String.format("Log in for %1$s unsuccessful.", username));
                     html = HandlerUtil.loadPageFromClasspath("html/index_failed_login.html");
                     responseCode = 200;
                 } else {
-                    LOGGER.info(String.format("Log in for %1$s unsuccessful.", username));
+                    LOGGER.info(String.format("Log in for %1$s successful.", username));
                     HandlerUtil.writeCookie(exchange, COOKIE_USERNAME_KEY, username);
                     HandlerUtil.writeCookie(exchange, COOKIE_PASSWORD_KEY, password);
                     String htmlTemplate = HandlerUtil.loadPageFromClasspath("html/lobby.html");
