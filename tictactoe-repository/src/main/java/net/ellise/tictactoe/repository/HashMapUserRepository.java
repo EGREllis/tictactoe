@@ -13,7 +13,7 @@ public class HashMapUserRepository implements UserRepository {
     @Override
     public User loadUser(String username, String password) {
         User result = null;
-        if (password.equals(usernameToPassword.get(username))) {
+        if (password != null && password.equals(usernameToPassword.get(username))) {
             result = usernameToUser.get(username);
         }
         return result;

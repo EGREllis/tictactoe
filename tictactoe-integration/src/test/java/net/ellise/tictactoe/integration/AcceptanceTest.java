@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 class AcceptanceTest {
     private static final String CLIENT_ROOT_URL = "http://localhost:8080/";
     private WebServer webServer;
+    private WebClient client;
 
     @BeforeEach
     void setup() throws Exception {
@@ -27,6 +28,7 @@ class AcceptanceTest {
         }
         webServer = webServerIterator.next();
         webServer.start();
+        this.client = new WebClient(CLIENT_ROOT_URL, new WebConversation());
     }
 
     @AfterEach
@@ -44,50 +46,43 @@ class AcceptanceTest {
 
     @Test
     void indexPageLinksToRegisterPage() throws Exception {
-        WebConversation conversation = new WebConversation();
-        WebResponse rootResponse = conversation.getResponse(CLIENT_ROOT_URL);
-        WebLink registerLink = rootResponse.getLinkWith("register");
-        registerLink.click();
-        WebResponse registerPage = conversation.getCurrentPage();
+        client.start();
+        client.followLink("register");
+        WebResponse registerPage = client.getCurrentPage();
 
         assertThat(registerPage.getResponseCode(), is(equalTo(200)));
     }
 
     @Test
     void indexPageCanNotLoginWithoutRegistration() throws Exception {
-        WebConversation conversation = new WebConversation();
-        WebResponse indexResponse = conversation.getResponse(CLIENT_ROOT_URL);
-        WebForm loginForm = indexResponse.getFormWithID("login");
+        client.start();
+        client.completeLoginPage("john.wick", "dog");
 
-        loginForm.setParameter("username", "John");
-        loginForm.setParameter("password", "Wick");
-        WebResponse canNotLogin = loginForm.submit();
-
+        WebResponse canNotLogin = client.getCurrentPage();
         assertThat(canNotLogin.getResponseCode(), is(equalTo(200)));
         assertThat(canNotLogin.getText(), containsString("We could not find a user with that username and password."));
     }
 
     @Test
     void indexPageCanLogInAfterRegistration() throws Exception {
-        WebConversation webConversation = new WebConversation();
-        WebResponse indexResponse = webConversation.getResponse(CLIENT_ROOT_URL);
-        WebLink registerLink = indexResponse.getLinkWith("register");
-        registerLink.click();
-        WebResponse registerPage = webConversation.getCurrentPage();
-        WebForm registerForm = registerPage.getFormWithID("register");
-        registerForm.setParameter("username", "John.Wick");
-        registerForm.setParameter("password", "dog");
-        registerForm.setParameter("confirm", "dog");
-        registerForm.submit();
+        client.start();
+        client.followLink("register");
+        client.completeRegistrationPage("john.wick", "dog");
+        client.completeLoginPage("john.wick", "dog");
 
-        WebResponse loginPage = webConversation.getCurrentPage();
-        WebForm loginForm = loginPage.getFormWithID("login");
-        loginForm.setParameter("username", "John.Wick");
-        loginForm.setParameter("password", "dog");
-        loginForm.submit();
-
-        WebResponse lobbyPage = webConversation.getCurrentPage();
+        WebResponse lobbyPage = client.getCurrentPage();
         assertThat(lobbyPage.getResponseCode(), is(equalTo(200)));
-        assertThat(lobbyPage.getText(), containsString("Welcome John.Wick"));
+        assertThat(lobbyPage.getText(), containsString("Welcome john.wick"));
+    }
+
+    @Test
+    void lobbyPageContainsLinkToNewGame() throws Exception {
+        client.start();
+        client.followLink("register");
+        client.completeRegistrationPage("john.wick", "dog");
+        client.completeLoginPage("john.wick", "dog");
+
+        WebResponse gamePage = client.getCurrentPage();
+        client.placePiece(1, 1);
     }
 }

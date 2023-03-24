@@ -2,6 +2,7 @@ package net.ellise.tictactoe.web;
 
 import com.sun.net.httpserver.HttpServer;
 import net.ellise.tictactoe.repository.UserRepository;
+import net.ellise.tictactoe.web.handler.BoardHandler;
 import net.ellise.tictactoe.web.handler.IndexHandler;
 import net.ellise.tictactoe.web.handler.RegisterHandler;
 
@@ -33,6 +34,7 @@ public class WebServerImpl implements WebServer {
         UserRepository userRepository = loadUserRepository();
         server.createContext("/", new IndexHandler(userRepository));
         server.createContext("/register", new RegisterHandler(userRepository));
+        server.createContext("/board", new BoardHandler());
         server.setExecutor(null);
         server.start();
     }

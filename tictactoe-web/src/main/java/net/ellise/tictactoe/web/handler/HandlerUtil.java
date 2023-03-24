@@ -4,6 +4,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.*;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,26 +45,21 @@ public class HandlerUtil {
         responseHeader.set("Set-Cookie", cookieName+"="+cookieValue+";");
     }
 
-    public static String getCookie(HttpExchange exchange, String cookieName) {
-        String result = "";
+    public static Map<String,String> getCookies(HttpExchange exchange) {
+        Map<String,String> cookies = new HashMap<>();
         Headers headers = exchange.getRequestHeaders();
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            if ("Cookie".equals(entry.getKey())) {
-                for (String value : entry.getValue()) {
-                    for (String parameter : value.split("; ")) {
-                        Pattern pattern = Pattern.compile("([^=]+)=([^=]+)");
-                        Matcher matcher = pattern.matcher(parameter);
-                        if (matcher.matches()) {
-                            if (cookieName.equals(matcher.group(1))) {
-                                result = matcher.group(2);
-                                return result;
-                            }
-                        }
+        for (Map.Entry<String,List<String>> entry : headers.entrySet()) {
+            for (String value : entry.getValue()) {
+                for (String parameter : value.split(";")) {
+                    Pattern pattern = Pattern.compile("([^=]+)=([^=]+)");
+                    Matcher matcher = pattern.matcher(parameter);
+                    if (matcher.matches()) {
+                        cookies.put(matcher.group(1), matcher.group(2));
                     }
                 }
             }
         }
-        return result;
+        return cookies;
     }
 
     public static Map<String,String> parsePostAttributes(HttpExchange exchange) {
@@ -83,6 +79,17 @@ public class HandlerUtil {
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
             ioe.printStackTrace(System.err);
+        }
+        return attributes;
+    }
+
+    public static Map<String,String> parseGetAttributes(HttpExchange exchange) {
+        Map<String,String> attributes = new HashMap<>();
+        URI uri = exchange.getRequestURI();
+        String query = uri.getQuery();
+        for (String pair : query.split("&")) {
+            String[] pairArray = pair.split("=");
+            attributes.put(pairArray[0], pairArray[1]);
         }
         return attributes;
     }

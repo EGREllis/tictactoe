@@ -44,4 +44,13 @@ class HashMapUserRepositoryTest {
         assertThat(registerCharon, is(equalTo(true)));
         assertThat(wick.getId(), is(not(equalTo(charon.getId()))));
     }
+
+    @Test
+    void shouldReturnNullIfUsernamePresentButPasswordWrong() {
+        boolean registerWick = repository.saveUser("john.wick", "dog");
+
+        User user = repository.loadUser("john.wick", null);
+
+        assertThat(user, is(nullValue()));
+    }
 }
